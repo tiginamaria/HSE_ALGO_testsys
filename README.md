@@ -29,3 +29,9 @@ positional arguments:
   scores_path    Path to directory where to save users' scores.
 
 ```
+
+Result output for each user contains scores for all contests and tasts (A, B, C, ...) in format .csv file: \
+ok	- ok before deadline \
+\[ok\]	- ok after deadline \
+no	- not passed \
+wa	- wrong answer 
