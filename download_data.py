@@ -35,7 +35,7 @@ def download_monitor(login: str, token: str, contests_path: str, monitors_path: 
     if not os.path.exists(monitors_path):
         os.makedirs(monitors_path)
 
-    for contest in df_contests['contest'].values:
+    for contest in df_contests['Contest'].values:
         page = requests.get("https://acm.math.spbu.ru/tsweb/monitor",
                             cookies={'freshness': '5', 'tsw': f'{login}|{token}|{contest}|'},
                             headers={'Cache-Control': 'no-cache'})
@@ -50,7 +50,7 @@ def download_results(contests_path: str, results_path: str):
     if not os.path.exists(results_path):
         os.makedirs(results_path)
 
-    for contest in df_contests['contest'].values:
+    for contest in df_contests['Contest'].values:
         page = requests.get(f"http://acm.math.spbu.ru/cgi-bin/monitor_au.pl/m{contest}.dat")
         results = get_table_from_page(page)
         pd.DataFrame(results[1:], columns=results[0]) \

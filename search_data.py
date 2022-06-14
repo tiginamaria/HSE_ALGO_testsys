@@ -35,7 +35,7 @@ def search_user_results(contests_path: str, monitors_path: str, results_path: st
     for user in df_users['User'].values:
         contests_scores = []
 
-        for contest in df_contests['contest']:
+        for contest in df_contests['Contest']:
             df_results = pd.read_csv(os.path.join(results_path, f'{contest}.csv'))
             df_monitor = pd.read_csv(os.path.join(monitors_path, f'{contest}.csv'))
             user_results = get_contest_scores(df_results, user)
