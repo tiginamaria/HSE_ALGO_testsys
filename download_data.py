@@ -61,8 +61,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument('contests_path', type=str, help='Path to .csv file with list of contests.')
-    parser.add_argument('monitors_path', type=str, help='Path to directory where to save monitors.')
-    parser.add_argument('results_path', type=str, help='Path to directory where to save results.')
+    parser.add_argument('monitors_path', type=str, help='Path to directory where to save monitors for each contest.')
+    parser.add_argument('results_path', type=str, help='Path to directory where to save results for each contest.')
 
     parser.add_argument('login', type=str, help='Test sys login.')
     parser.add_argument('token', type=str, help='Test sys token.')

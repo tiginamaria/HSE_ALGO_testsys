@@ -60,8 +60,8 @@ if __name__ == '__main__':
     parser.add_argument('contests_path', type=str, help='Path to .csv file with list of contests.')
     parser.add_argument('monitors_path', type=str, help='Path to directory where to save monitors.')
     parser.add_argument('results_path', type=str, help='Path to directory where to save results.')
-    parser.add_argument('scores_path', type=str, help='Path to directory where to save results.')
-    parser.add_argument('users_path', type=str, help='Path to directory where to save results.')
+    parser.add_argument('users_path', type=str, help='Path to directory with list of users in .csv format.')
+    parser.add_argument('scores_path', type=str, help='Path to directory where to save users scores.')
 
     args = parser.parse_args(sys.argv[1:])
 
