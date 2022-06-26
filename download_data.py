@@ -16,9 +16,12 @@ def get_table_from_page(page):
         header.append(cell.text)
 
     results = [header]
-    for row in table.findAll("tr", {"class": ['even', 'odd']})[:-4]:
+    for row in table.findAll("tr", {"class": ['even', 'odd']}):
         result = []
         cells = row.findAll("td")
+        name = cells[1].text[4:]
+        if name in ['its', 'pted', 'cted', 'en']:
+            continue
         result.append(cells[1].text[4:])
         for cell in cells[2:-3]:
             result.append(cell['class'][0])
