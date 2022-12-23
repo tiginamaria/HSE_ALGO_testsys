@@ -1,27 +1,27 @@
 import argparse
+import ast
 import os
 import sys
+from typing import List
 
 import pandas as pd
 
 
-def get_contest_scores(df: pd.DataFrame, user: str):
-    df_user = df[df['User'] == user]
+def get_contest_scores(df_contest: pd.DataFrame, user: pd.Series) -> pd.Series:
+    df_user_contest = df_contest[df_contest['User'] == user['Login']]
+    if df_user_contest.shape[0] != 0:
+        return df_user_contest.iloc[0]
+
+    scores = ['no'] * (df_contest.shape[1] - 2)
+    return pd.Series(list(user.values) + scores, index=df_user_contest.columns)
+
+
+def compare_contest_scores(user_results, user_monitor) -> List[str]:
     contest_scores = []
-    for i in range(0, ord(df.columns[1][-1]) - ord('A')):
-        contest_scores.append('')
-    if df_user.shape[0] > 0:
-        contest_scores += list(df_user.iloc[0].values)[1:]
-    else:
-        contest_scores += list(['no'] * (df.shape[1] - 1))
-
-    return contest_scores
-
-
-def compare_contest_scores(user_results, user_monitor):
-    contest_scores = []
-    for (result, monitor) in zip(user_results, user_monitor):
-        if result not in ['ok', 'firstokeven'] and monitor in ['ok', 'firstokeven']:
+    for (result, monitor) in zip(user_results[2:], user_monitor[2:]):
+        monitor = 'ok' if monitor in ['firstokeven', 'firstokodd'] else monitor
+        result = 'ok' if result in ['firstokeven', 'firstokodd'] else result
+        if result != 'ok' and monitor == 'ok':
             contest_scores.append(f'[{monitor}]')
         else:
             contest_scores.append(monitor)
@@ -29,29 +29,54 @@ def compare_contest_scores(user_results, user_monitor):
 
 
 def search_user_results(contests_path: str, monitors_path: str, results_path: str, scores_path: str, users_path: str):
-    df_users = pd.read_csv(users_path)
+    df_users = pd.read_csv(users_path, sep='\t')
     df_contests = pd.read_csv(contests_path)
+    dones_count = []
+    todos_count = []
 
-    for user in df_users['User'].values:
+    for _, user in df_users.iterrows():
+        login = user['Login']
+        if login == '-':
+            dones_count.append(0)
+            todos_count.append(0)
+            continue
+
         contests_scores = []
 
-        for contest in df_contests['Contest']:
-            df_results = pd.read_csv(os.path.join(results_path, f'{contest}.csv'))
-            df_monitor = pd.read_csv(os.path.join(monitors_path, f'{contest}.csv'))
+        done_count, todo_count = 0, 0
+        for _, contest in df_contests.iterrows():
+            contest_name = contest['Contest']
+            df_results = pd.read_csv(os.path.join(results_path, f'{contest_name}.csv'))
+            df_monitor = pd.read_csv(os.path.join(monitors_path, f'{contest_name}.csv'))
             user_results = get_contest_scores(df_results, user)
             user_monitor = get_contest_scores(df_monitor, user)
             contest_scores = compare_contest_scores(user_results, user_monitor)
 
-            contests_scores.append([contest, len(contest_scores)] + contest_scores)
+            musts = ast.literal_eval(contest['Must'])
+            for i, _ in enumerate(musts):
+                if contest_scores[i] == '[ok]':
+                    done_count += 1
+                elif 'ok' not in contest_scores[i]:
+                    todo_count += 1
+
+            contests_scores.append(list(contest.values[:1]) + [str(len(contest_scores))] + contest_scores)
+
+        dones_count.append(done_count)
+        todos_count.append(todo_count)
 
         size = max(list(map(lambda result: len(result), contests_scores)))
+
         for contest_scores in contests_scores:
             if len(contest_scores) < size:
                 contest_scores += [''] * (size - len(contest_scores))
 
         columns = [chr(ord('A') + i) for i in range(0, size - 2)]
         pd.DataFrame(contests_scores, columns=['Contest', 'Total'] + columns) \
-            .to_csv(os.path.join(scores_path, f'{user}.csv'), index=False, sep='\t')
+            .to_csv(os.path.join(scores_path, f'{login}.csv'), index=False, sep='\t')
+
+    df_users['done'] = dones_count
+    df_users['todo'] = todos_count
+    df_users.to_csv(os.path.join(scores_path, f'total.csv'), index=False, sep='\t')
 
 
 if __name__ == '__main__':

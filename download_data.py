@@ -12,17 +12,19 @@ def get_table_from_page(page):
     table = html.find("table", {"class": "mtab"})
 
     header = []
-    for cell in table.findAll("tr", {"class": "head"})[0].findAll("th")[1:-3]:
+    for cell in table.findAll("tr", {"class": "head"})[0].findAll("th")[0:-3]:
         header.append(cell.text)
 
     results = [header]
     for row in table.findAll("tr", {"class": ['even', 'odd']}):
         result = []
         cells = row.findAll("td")
-        name = cells[1].text[4:]
+        login = cells[0].text
+        name = ' '.join(cells[1].text.split(' ')[1:])
         if name in ['its', 'pted', 'cted', 'en']:
             continue
-        result.append(cells[1].text[4:])
+        result.append(login)
+        result.append(name)
         for cell in cells[2:-3]:
             result.append(cell['class'][0])
         results.append(result)
